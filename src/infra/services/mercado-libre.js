@@ -10,7 +10,7 @@ class MercadoLibreService {
 	}
 
 	async search(query = '') {
-		const { data } = await this.api.get(`/search?q=${query}&limit=4`);
+		const { data } = await this.api.get(`/sites/MLA/search?q=${query}`);
 
 		return data;
 	}
