@@ -4,6 +4,7 @@ class ItemsController {
  }
 
  async get(httpRequest) {
+  
   const response = await this.mercadoLibreService.search("macbook");
 
   console.log(response);
