@@ -1,4 +1,4 @@
-import ServerError from '../errors/server-error';
+const ServerError =  require('../errors/server-error');
 
 const badRequest = (error) => ({
 	statusCode: 400,

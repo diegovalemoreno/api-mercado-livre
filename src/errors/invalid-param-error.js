@@ -1,4 +1,4 @@
-export class InvalidParamError extends Error {
+module.exports = class InvalidParamError extends Error {
   constructor (paramName) {
     super(`Invalid param: ${paramName}`)
 

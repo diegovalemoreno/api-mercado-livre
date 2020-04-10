@@ -1,4 +1,4 @@
-export class ServerError extends Error {
+module.exports = class ServerError extends Error {
   constructor () {
     super('Internal server error')
 
