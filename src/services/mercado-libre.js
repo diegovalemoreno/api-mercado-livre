@@ -10,7 +10,7 @@ class MercadoLibreService {
 	}
 
 	async search(query = '') {
-		const { data } = await this.api.get(`/sites/MLB/search?q=${query}`);
+		const { data } = await this.api.get(`/sites/MLA/search?q=${query}&limit=5`);
 
 		return data;
 	}
