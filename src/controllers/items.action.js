@@ -1,4 +1,5 @@
 const MercadoLibreService = require('../services/mercado-libre');
+const mapCondition = require('../helpers/map-condition');
 
 class ItemsAction {
 	constructor() {
@@ -18,7 +19,16 @@ class ItemsAction {
 	async getItems(search) {
 		const { results, available_filters: availableFilters } = await this.mercadoLibreService.search(search);
 
-		if (!results.length) return null;
+		const emptyResult = {
+			author: {
+				name: '',
+				lastname: ''
+			},
+			categories: [],
+			items: []
+		};
+
+		if (!results.length) return emptyResult;
 
 		const [ firstResult ] = results;
 
@@ -26,7 +36,7 @@ class ItemsAction {
 
 		const [ categoriesFilters ] = availableFilters.filter(({ id }) => id === 'category' || id === 'LINE');
 
-		if (!categoriesFilters) return null;
+		if (!categoriesFilters) return emptyResult;
 
 		const [ firstCategory ] = categoriesFilters.values;
 
@@ -34,14 +44,17 @@ class ItemsAction {
 
 		const categories = this._getCategories(firstResult.attributes);
 
-		const items = results.map(({ id, title, thumbnail, condition, shipping, price }) => ({
+		const items = results.map(({ id, title, thumbnail, condition, shipping, price, address }) => ({
 			id,
 			title,
 			picture: thumbnail,
 			condition,
+			address: address.state_name,
 			free_shipping: shipping.free_shipping,
+			condition: mapCondition(condition),
 			price: {
-				currency: currency.symbol,
+				symbol: currency.symbol,
+				currency: currency.id,
 				amount: price,
 				decimals: currency.decimal_places
 			}
@@ -52,7 +65,7 @@ class ItemsAction {
 				name: '',
 				lastname: ''
 			},
-			categories: [ firstCategoryName, ...categories ],
+			categories: [ ...new Set([ firstCategoryName, ...categories ]) ],
 			items
 		};
 	}
@@ -65,7 +78,7 @@ class ItemsAction {
 
 		const currency = await this.mercadoLibreService.getCurrency(product.currency_id);
 
-		const { id, title, pictures, condition, shipping, sold_quantity, price } = product;
+		const { id, title, pictures, condition, shipping, sold_quantity, price, address } = product;
 
 		return {
 			author: {
@@ -74,13 +87,15 @@ class ItemsAction {
 			},
 			id,
 			title,
+			// address: address.state_name,
 			price: {
-				currency: currency.symbol,
+				symbol: currency.symbol,
+				currency: currency.id,
 				amount: price,
 				decimals: currency.decimal_places
 			},
 			picture: pictures[0].url,
-			condition,
+			condition: mapCondition(condition),
 			free_shipping: shipping.free_shipping,
 			sold_quantity: sold_quantity,
 			description: description.plain_text
